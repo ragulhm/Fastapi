@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Query API</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AI Query API</h1>
+        <form id="query-form">
+            <input type="text" id="question" name="question" placeholder="Ask a question about your documents..." required>
+            <button type="submit">Ask</button>
+        </form>
+        <div id="loading" style="display: none;">
+            <p>Loading...</p>
+        </div>
+        <div id="error" class="error-message" style="display: none;"></div>
+        <div id="response-card" class="card" style="display: none;">
+            <h2>Answer</h2>
+            <p id="answer"></p>
+            <div class="details">
+                <p><strong>Source:</strong> <span id="source"></span></p>
+                <p><strong>Confidence:</strong> <span id="confidence"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('query-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const question = document.getElementById('question').value;
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const responseCard = document.getElementById('response-card');
+
+            if (!question.trim()) {
+                errorDiv.textContent = 'Question cannot be empty.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            responseCard.style.display = 'none';
+
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'An error occurred');
+                }
+
+                const data = await response.json();
+
+                document.getElementById('answer').textContent = data.answer;
+                document.getElementById('source').textContent = data.source;
+                document.getElementById('confidence').textContent = data.confidence;
+                
+                responseCard.style.display = 'block';
+
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
