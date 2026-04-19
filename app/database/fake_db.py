@@ -1,4 +1,3 @@
-"""In-memory persistence layer for notes."""
 
 from datetime import datetime
 from typing import List, Optional
