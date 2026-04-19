@@ -4,7 +4,7 @@ from app.models.note import Note
 
 
 class FakeNoteDB:
-    """Simple in-memory repository that mimics database behavior."""
+
 
     def __init__(self) -> None:
         self._notes: List[Note] = []
